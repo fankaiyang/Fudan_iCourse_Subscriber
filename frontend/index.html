@@ -87,10 +87,10 @@
               d="M4 4v5h4.5M20 20v-5h-4.5M4.5 9A8 8 0 0119.5 15M19.5 15A8 8 0 014.5 9"/>
       </svg>
     </button>
-    <!-- Edit (detail view, desktop) -->
+    <!-- Edit (detail view) -->
     <button x-show="view === 'detail' && currentLecture?.state === 'ready'"
             @click="startEdit()"
-            class="hidden md:block text-sm bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600">
+            class="text-sm bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600">
       Edit
     </button>
   </div>
@@ -320,15 +320,6 @@
              x-effect="currentLecture && $nextTick(() => activateKaTeX($el))">
         </div>
 
-        <!-- FAB edit button (mobile) -->
-        <button x-show="currentLecture.state === 'ready'"
-                @click="startEdit()"
-                class="md:hidden fixed right-5 bottom-24 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-600 active:scale-95 z-20">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
-          </svg>
-        </button>
       </div>
     </template>
   </div>

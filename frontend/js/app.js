@@ -127,7 +127,7 @@ document.addEventListener("alpine:init", () => {
     setupError: "", setupTesting: false,
     settingsForm: {}, showSecrets: {},
     iterations: 10000, repoOwner: "", repoName: "", dataBranch: "data",
-    _history: [],
+    _history: [], _historyIndex: 0,
 
     async init() {
       const detected = ICS.github.detectRepo();
@@ -136,6 +136,22 @@ document.addEventListener("alpine:init", () => {
       this.repoName = s.repo || (detected?.repo ?? "");
       this.dataBranch = s.branch || "data";
       this.iterations = s.iterations || 10000;
+
+      // Seed browser history so back-swipe/button navigates within the SPA
+      // instead of exiting the page. We store an index in each state so the
+      // popstate handler can tell whether the user went back or forward.
+      this._historyIndex = 0;
+      history.replaceState({ idx: 0 }, "");
+      window.addEventListener("popstate", (e) => {
+        const newIdx = e.state?.idx ?? 0;
+        if (newIdx < this._historyIndex) {
+          this._historyIndex = newIdx;
+          this._popHistory();
+        } else {
+          this._historyIndex = newIdx; // forward navigation – keep index in sync
+        }
+      });
+
       const creds = _loadCreds();
       if (!creds) { this.view = "setup"; return; }
       await this._loadDB(creds);
@@ -191,6 +207,8 @@ document.addEventListener("alpine:init", () => {
     navigate(view, params) {
       params = params || {};
       this._history.push({ view: this.view, courseId: this.currentCourse?.course_id, lectureId: this.currentLecture?.sub_id });
+      this._historyIndex++;
+      history.pushState({ idx: this._historyIndex }, "");
       this._go(view, params);
     },
     _go(view, params) {
@@ -206,6 +224,13 @@ document.addEventListener("alpine:init", () => {
       this.view = view;
     },
     goBack() {
+      if (this._history.length > 0) {
+        history.back(); // triggers popstate → _popHistory() updates app state
+      } else {
+        this._go("courses");
+      }
+    },
+    _popHistory() {
       const p = this._history.pop();
       if (p) this._go(p.view, { courseId: p.courseId, subId: p.lectureId });
       else this._go("courses");
